@@ -9,6 +9,7 @@ export class Recipe {
     public category: string
     public ingredients: [string]
     public steps: [string]
+    public createdAt: Number
 
     constructor(props: Omit<Recipe, '_id'>, _id?: mongoose.Types.ObjectId) {
         this.name = props.name
@@ -17,6 +18,7 @@ export class Recipe {
         this.portions = props.portions
         this.ingredients = props.ingredients
         this.steps = props.steps
+        this.createdAt = props.createdAt
         if (!_id) {
             this._id = new mongoose.Types.ObjectId()
         } else {

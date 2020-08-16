@@ -9,7 +9,7 @@ export class CreateUserController {
     async handle(request: Request, response: Response): Promise<Response> {
         const {name, email, password} = request.body
         try {
-            let _id = await this.createUserUseCase.execute({name, email, password})
+            let _id = await this.createUserUseCase.execute({name, email, password, createdAt: Date.now()})
             return response.status(201).json({_id: _id})
         } catch (err) {
             return response.status(500).json({

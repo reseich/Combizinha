@@ -7,6 +7,7 @@ export interface IRecipe extends mongoose.Document {
     category: string;
     ingredients: [string];
     steps: [string];
+    createdAt: Number;
 };
 
 export const RecipeSchema = new mongoose.Schema({
@@ -32,6 +33,10 @@ export const RecipeSchema = new mongoose.Schema({
     },
     steps: {
         type: Array,
+        required: true
+    },
+    createdAt: {
+        type: Number,
         required: true
     }
 });

@@ -5,4 +5,5 @@ export interface ICreateRecipeDTO {
     category: string;
     ingredients: [string];
     steps: [string];
+    createdAt: number
 }

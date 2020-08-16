@@ -17,12 +17,15 @@ export class CreateRecipeController {
             steps
         } = request.body
         try {
-            let _id = await this.createRecipeUseCase.execute({name,
+            let _id = await this.createRecipeUseCase.execute({
+                name,
                 prepareTime,
                 portions,
                 category,
                 ingredients,
-                steps})
+                steps,
+                createdAt: Date.now()
+            })
             return response.status(201).json({_id: _id})
         } catch (err) {
             return response.status(500).json({
