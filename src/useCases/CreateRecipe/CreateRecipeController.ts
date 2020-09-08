@@ -1,5 +1,7 @@
 import {CreateRecipeUseCase} from "./CreateRecipeUseCase";
 import {Response, Request} from "express";
+import {Logger} from "tslog";
+const log: Logger = new Logger();
 
 export class CreateRecipeController {
     constructor(private createRecipeUseCase: CreateRecipeUseCase) {
@@ -28,6 +30,7 @@ export class CreateRecipeController {
             })
             return response.status(201).json({_id: _id})
         } catch (err) {
+            log.error(err.message)
             return response.status(500).json({
                 message: err.message || 'Unexpected Error'
             })

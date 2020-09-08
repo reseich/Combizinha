@@ -29,4 +29,21 @@ export class MongoRecipesRepository implements IRecipesRepository {
         await RecipeSchema.create(recipe)
     }
 
+    findByItemRecipes(items: [string]): DocumentQuery<any, any> {
+        let regexs:any = []
+
+        items.forEach((item)=>{
+            if(item){
+                let regex = new RegExp(`.*${item.toString()}.*`,"g");
+                regexs.push({ingredients:regex})
+            }
+        })
+
+
+        if(!regexs.length){
+            throw new Error("Send a ingredient to search")
+        }
+        return RecipeSchema.find({$and:regexs})
+    }
+
 }
