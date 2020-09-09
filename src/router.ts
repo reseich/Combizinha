@@ -4,7 +4,6 @@ import {getRecipesController} from "./useCases/GetRecipes";
 import {getRecipesByItemController} from "./useCases/GetRecipesByItem";
 import {createUserController} from "./useCases/CreateUser";
 import {createRecipeController} from "./useCases/CreateRecipe";
-import Utils from "./repositories/implementations/Mongo/util/Utils";
 
 const router = Router()
 
