@@ -6,5 +6,5 @@ export interface IRecipesRepository {
     findRecipe(_id: string): Promise<Recipe | null>
     save(recipe:Recipe): Promise<void>
 
-    findByItemRecipes(items: [string]): DocumentQuery<any, any>;
+    findByItemRecipes(items: [string], page:number): DocumentQuery<any, any>;
 }

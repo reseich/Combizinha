@@ -6,7 +6,7 @@ export class GetRecipesByItemUseCase {
     constructor(private recipesRepository: IRecipesRepository) {
     }
 
-    async execute(data: IGetRecipesDTO): Promise<DocumentQuery<any, any>> {
-        return this.recipesRepository.findByItemRecipes(data.items);
+    async execute(data: any, page: number): Promise<DocumentQuery<any, any>> {
+        return this.recipesRepository.findByItemRecipes(data.items, page);
     }
 }

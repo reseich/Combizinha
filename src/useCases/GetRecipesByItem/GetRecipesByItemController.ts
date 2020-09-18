@@ -11,16 +11,17 @@ export class GetRecipesByItemController {
 
     async handle(request: Request, response: Response): Promise<Response> {
         let error = []
-        if (!request.body) {
+        if (!request.query) {
             error.push('send a body in request')
-        } else if (request.body && !request.body.items) {
+        } else if (request.query && !request.query.items) {
             error.push('send items field')
-        } else if (request.body && request.body.items) {
-            if (!Array.isArray(request.body.items)) {
-                error.push('field items need to be a array of strings')
+        } else if (request.query && request.query.items) {
+            if (!Array.isArray(request.query.items)) {
+                request.query.items = new Array(request.query.items.toString())
             } else {
                 let valid = false
-                for(let item of request.body.items){
+
+                for(let item of request.query.items){
                     if(item && typeof item === "string" || item instanceof String){
                         valid = true
                     }
@@ -44,7 +45,7 @@ export class GetRecipesByItemController {
 
 
         try {
-            let recipes = await this.getRecipesByItemUseCase.execute(request.body)
+            let recipes = await this.getRecipesByItemUseCase.execute(request.query, Number(request.query.page) || 1)
             return response.status(200).json({recipes: recipes})
         } catch (err) {
             log.error(err.message)
