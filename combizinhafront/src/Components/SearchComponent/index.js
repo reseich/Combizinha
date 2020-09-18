@@ -30,8 +30,8 @@ function SearchComponent(props) {
                     fullWidth
                     onChange={_handleTextFieldChange}
                     id="ingredients"
-                    error={ingredients !== null && !ingredients.length && (ingredients && ingredients[0].length <= 1)}
-                    helperText={ingredients !== null && !ingredients.length && (ingredients && ingredients[0].length <= 1)? "Preencha pelo menos um ingrediente": null}
+                    error={ingredients !== null && !ingredients.length && (ingredients[0] && ingredients[0].length <= 1)}
+                    helperText={ingredients !== null && !ingredients.length && (ingredients[0] && ingredients[0].length <= 1)? "Preencha pelo menos um ingrediente": null}
                     placeholder="Coloque os ingredientes separados por virgula. Ex. batata, macarrão"
                     label="Ingredientes"
                     name="ingredients"

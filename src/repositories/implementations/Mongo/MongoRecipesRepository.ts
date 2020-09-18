@@ -1,22 +1,35 @@
 import {IRecipesRepository} from "../../IRecipesRepository";
 import {Recipe} from "../../../entities/Recipe";
 import RecipeSchema from "./schemas/recipe";
-import {DocumentQuery} from "mongoose";
+import {Aggregate} from "mongoose";
 
 export class MongoRecipesRepository implements IRecipesRepository {
-    findAllRecipes( category: string | null, pageNumber:number): DocumentQuery<any, any> {
+    findAllRecipes(category: string | null, page: number): Aggregate<any[]> {
         let nPerPage = 12
         if (!category) {
-            return RecipeSchema.find()
-                .skip(pageNumber > 0 ? ((pageNumber - 1) * nPerPage) : 0)
-                .select('-__v')
-                .limit(nPerPage);
+            return RecipeSchema.aggregate([
+                {'$sort': {'order_number': -1}},
+                {'$unset': ["__v"]},
+                {
+                    '$facet': {
+                        metadata: [{$count: "total"}, {$addFields: {page: (page || 1)}}],
+                        data: [{$skip: page > 0 ? ((page - 1) * nPerPage) : 0}, {$limit: nPerPage}]
+                    }
+                }
+            ])
+
         } else {
-            return RecipeSchema.find()
-                .where({category: category})
-                .select('-__v')
-                .skip(pageNumber > 0 ? ((pageNumber - 1) * nPerPage) : 0)
-                .limit(nPerPage);
+            return RecipeSchema.aggregate([
+                {'$match': {category: category}},
+                {'$sort': {'order_number': -1}},
+                {'$unset': ["__v"]},
+                {
+                    '$facet': {
+                        metadata: [{$count: "total"}, {$addFields: {page: (page || 1)}}],
+                        recipes: [{$skip: page > 0 ? ((page - 1) * nPerPage) : 0}, {$limit: nPerPage}]
+                    }
+                }
+            ])
         }
 
     }
@@ -29,23 +42,32 @@ export class MongoRecipesRepository implements IRecipesRepository {
         await RecipeSchema.create(recipe)
     }
 
-    findByItemRecipes(items: [string],pageNumber:number): DocumentQuery<any, any> {
+    findByItemRecipes(items: [string], page: number): Aggregate<any[]> {
         let nPerPage = 12
-        let regexs:any = []
+        let regexs: any = []
 
-        items.forEach((item)=>{
-            if(item){
-                let regex = new RegExp(`(?<![\\w\\d(à-ú)(À-Ú)])${item.toString()}(?![\\w\\d(à-ú)(À-Ú)])`,"gi");
-                regexs.push({ingredients:regex})
+        items.forEach((item) => {
+            if (item) {
+                let regex = new RegExp(`(?<![\\w\\d(à-ú)(À-Ú)])${item.toString()}(?![\\w\\d(à-ú)(À-Ú)])`, "gi");
+                regexs.push({ingredients: regex})
             }
         })
 
 
-        if(!regexs.length){
+        if (!regexs.length) {
             throw new Error("Send a ingredient to search")
         }
-        return RecipeSchema.find({$and:regexs}).select('-__v').skip(pageNumber > 0 ? ((pageNumber - 1) * nPerPage) : 0)
-            .limit(nPerPage);
+        return RecipeSchema.aggregate([
+            {'$match': {$and: regexs}},
+            {'$sort': {'order_number': -1}},
+            {'$unset': ["__v"]},
+            {
+                '$facet': {
+                    metadata: [{$count: "total"}, {$addFields: {page: (page || 1)}}],
+                    data: [{$skip: page > 0 ? ((page - 1) * nPerPage) : 0}, {$limit: nPerPage}]
+                }
+            }
+        ])
     }
 
 }

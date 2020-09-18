@@ -6,6 +6,7 @@ import {CardComponent} from "../Components/CardComponent";
 import SearchComponent from "../Components/SearchComponent";
 import axios from 'axios'
 import Qs from 'qs'
+import Pagination from "@material-ui/lab/Pagination";
 
 
 const styles = {
@@ -22,6 +23,10 @@ const styles = {
     errorMessage: {
         color: 'red'
     },
+    pagination: {
+        marginTop: 16,
+        marginBottom: 16,
+    },
 }
 
 
@@ -30,16 +35,29 @@ class Home extends Component {
         super(props);
         this.state = {
             recipes: [],
+            recipeCount: 0,
             loading: true,
-            error: null
+            error: null,
+            page: 1,
+            numberOfPages: null,
+            ingredients: null
         }
     }
 
     async handleSubmit(ingredients, e) {
         e.preventDefault()
-        this.setState({loading: true})
-        let params = {
-            items: ingredients
+        await this.setState({loading: true, ingredients:ingredients, page: 1})
+        await this.getRecipes()
+
+    }
+
+    async getRecipes(page) {
+        let params = {page:page || 1}
+        let endPoint = 'recipes'
+
+        if(this.state.ingredients && this.state.ingredients.length){
+            params.items = this.state.ingredients
+            endPoint = 'recipesByItem'
         }
 
         let myAxios = axios.create({
@@ -47,9 +65,17 @@ class Home extends Component {
             paramsSerializer: params => Qs.stringify(params, {arrayFormat: 'repeat'})
         })
 
-        myAxios.get('/recipesByItem', {params})
+        myAxios.get(`/${endPoint}`, {params})
             .then((data) => {
-                this.setState({recipes: data.data.recipes, loading: false, error: null})
+                let recipeCount = data.data.recipes.metadata[0].total
+                let numberOfPage = Math.ceil(data.data.recipes.metadata[0].total / 12)
+                this.setState({
+                    recipes: data.data.recipes.data,
+                    loading: false,
+                    error: null,
+                    recipeCount: recipeCount,
+                    numberOfPages: numberOfPage,
+                })
 
             })
             .catch((err) => {
@@ -59,17 +85,9 @@ class Home extends Component {
 
     }
 
-    async componentDidMount() {
-        await axios.create({
-            baseURL: "http://localhost:3333/",
-            responseType: "json"
-        }).get('/recipes').then((data) => {
-            this.setState({recipes: data.data.recipes, loading: false, error: null})
-        }).catch((err) => {
-            this.setState({loading: false, error: err.response ? err.response.data.message : err})
-            console.log(err.response ? err.response.data.message : err)
-        })
 
+    async componentDidMount() {
+        await this.getRecipes()
     }
 
     loadContent() {
@@ -86,7 +104,7 @@ class Home extends Component {
                         <CardComponent card={card}/>
                     </Grid>
                 )
-            }) : <h1 className={this.props.classes.cardGrid}>Nenhuma receita encontrada</h1>}
+            }) : null}
         </Grid>
     }
 
@@ -97,10 +115,21 @@ class Home extends Component {
                     <Container className={this.props.classes.searchComponent}>
                         <SearchComponent submit={this.handleSubmit.bind(this)}/>
                     </Container>
+                    {!this.state.loading ? <h1>{this.state.recipeCount} Receitas encontradas</h1> : null}
                     {this.loadContent()}
+                    {this.state.numberOfPages ? <Pagination page={this.state.page} count={this.state.numberOfPages}
+                                                            className={this.props.classes.pagination}
+                                                            onChange={this.handlePaginate.bind(this)}
+                                                            color="primary"/> : null}
                 </Container>
             </main>
         );
+    }
+
+    async handlePaginate(e, value) {
+        this.setState({page: value, loading:true})
+        await this.getRecipes(value)
+
     }
 }
 

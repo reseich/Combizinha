@@ -18,21 +18,6 @@ export class GetRecipesByItemController {
         } else if (request.query && request.query.items) {
             if (!Array.isArray(request.query.items)) {
                 request.query.items = new Array(request.query.items.toString())
-            } else {
-                let valid = false
-
-                for(let item of request.query.items){
-                    if(item && typeof item === "string" || item instanceof String){
-                        valid = true
-                    }
-                    if(!(typeof item === "string" || item instanceof String)){
-                        error.push("send only strings")
-                    }
-
-                }
-                if(!valid){
-                    error.push('send at least one ingredient')
-                }
             }
         }
 
@@ -46,7 +31,7 @@ export class GetRecipesByItemController {
 
         try {
             let recipes = await this.getRecipesByItemUseCase.execute(request.query, Number(request.query.page) || 1)
-            return response.status(200).json({recipes: recipes})
+            return response.status(200).json({recipes: recipes[0]})
         } catch (err) {
             log.error(err.message)
             return response.status(500).json({
